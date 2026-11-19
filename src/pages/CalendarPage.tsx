@@ -13,7 +13,7 @@ const LEGEND: { label: string; status: StepStatus | 'Blackout' }[] = [
 ]
 
 export function CalendarPage() {
-  const { calendarProjects, openReview, setLocked } = useProjects()
+  const { calendarProjects, openExecution, setLocked } = useProjects()
 
   const range = useMemo(() => {
     const starts = calendarProjects.flatMap((p) => p.steps.map((s) => s.start)).filter(Boolean)
@@ -45,7 +45,7 @@ export function CalendarPage() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-noble-text">Project Calendar</h1>
         <p className="mt-1 text-sm text-noble-muted">
-          Locked projects after CFO &amp; GC approve on Execution and load to Calendar.
+          Locked projects after Formal Approval (Tax/Legal/Accounting/Finance).
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export function CalendarPage() {
 
         {calendarProjects.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-noble-muted">
-            No locked projects yet. Approve CFO &amp; GC on Execution, then Proceed to Calendar.
+            No locked projects yet. Complete Formal Approval, then Lock to Calendar.
           </div>
         )}
 
@@ -87,7 +87,7 @@ export function CalendarPage() {
               key={project.id}
               project={project}
               range={range}
-              onOpen={() => openReview(project.id)}
+              onOpen={() => openExecution(project.id)}
               onUnlock={() => setLocked(project.id, false)}
             />
           ))}

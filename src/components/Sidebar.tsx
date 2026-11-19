@@ -24,11 +24,11 @@ export function Sidebar() {
           </span>
         </NavLink>
 
-        <NavLink to="/execution" className={({ isActive }) => navClass(isActive)}>
+        <NavLink to="/approval" className={({ isActive }) => navClass(isActive)}>
           <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
-            <span className="block text-sm font-semibold text-noble-text">Execution Plan</span>
-            <span className="block text-xs text-noble-muted">{counts.drafting} Drafting</span>
+            <span className="block text-sm font-semibold text-noble-text">Formal Approval</span>
+            <span className="block text-xs text-noble-muted">{counts.drafting} Pending</span>
           </span>
         </NavLink>
 
@@ -73,8 +73,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-noble-border p-3 text-[10px] leading-snug text-noble-muted">
-        Informal builds plan → Formal (Tax/Legal/Accounting/Finance) → Execution (CFO/GC) →
-        Calendar.
+        Informal → Formal Review → Formal Approval → Lock to Calendar
       </div>
     </aside>
   )

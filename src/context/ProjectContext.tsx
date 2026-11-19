@@ -19,8 +19,7 @@ import {
 
 type ModalMode = 'plan' | 'review' | 'execution' | null
 
-const FORMAL_KEYS: ApprovalKey[] = ['tax', 'legal', 'accounting', 'finance']
-const EXEC_KEYS: ApprovalKey[] = ['cfo', 'gc']
+const APPROVAL_KEYS: ApprovalKey[] = ['tax', 'legal', 'accounting', 'finance']
 
 interface ProjectContextValue {
   projects: Project[]
@@ -67,11 +66,11 @@ function stampStageDate(project: Project, stage: Stage): Project {
     case 'Informal Vetting':
       stageDates.informal = today
       break
-    case 'Formal Vetting':
+    case 'Formal Review':
       stageDates.formal = today
       break
-    case 'Execution':
-      stageDates.execution = today
+    case 'Formal Approval':
+      stageDates.approval = today
       break
     case 'Locked in':
       stageDates.lockedIn = today
@@ -86,9 +85,9 @@ function statusForStage(stage: Stage): string {
       return 'Created by Tax'
     case 'Informal Vetting':
       return 'Building plan'
-    case 'Formal Vetting':
+    case 'Formal Review':
       return 'In formal review'
-    case 'Execution':
+    case 'Formal Approval':
       return 'Still drafting'
     case 'Locked in':
       return 'On Track'
@@ -126,17 +125,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   const canAdvanceToFormal = useCallback((project: Project) => project.steps.length >= 1, [])
 
-  const canAdvanceToExecution = useCallback((project: Project) => {
-    const deptsOk = FORMAL_KEYS.every((k) => project.approvals[k] === 'Approved')
+  const canAdvanceToExecution = useCallback(
+    (project: Project) => project.steps.length >= 1,
+    [],
+  )
+
+  /** Formal Approval → Lock to Calendar. */
+  const canLock = useCallback((project: Project) => {
+    const deptsOk = APPROVAL_KEYS.every((k) => project.approvals[k] === 'Approved')
     const windowOk =
       project.approvals.window30 === 'OK' || project.approvals.window30 === 'Approved'
     return deptsOk && windowOk && project.steps.length >= 1
   }, [])
-
-  const canLock = useCallback((project: Project) => {
-    const execOk = EXEC_KEYS.every((k) => project.approvals[k] === 'Approved')
-    return canAdvanceToExecution(project) && execOk
-  }, [canAdvanceToExecution])
 
   const moveStage = useCallback(
     (id: string, direction: 'back' | 'next') => {
@@ -147,25 +147,25 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         if (!canAdvanceToFormal(project)) {
           return {
             ok: false,
-            reason: 'Add at least one milestone before advancing to Formal Vetting.',
+            reason: 'Add at least one milestone before Formal Review.',
           }
         }
       }
 
-      if (direction === 'next' && project.stage === 'Formal Vetting') {
+      if (direction === 'next' && project.stage === 'Formal Review') {
         if (!canAdvanceToExecution(project)) {
           return {
             ok: false,
-            reason:
-              'Approve Tax, Legal, Accounting, Finance and clear the 30-day window before Execution.',
+            reason: 'Add at least one milestone before Formal Approval.',
           }
         }
       }
 
-      if (direction === 'next' && project.stage === 'Execution') {
+      if (direction === 'next' && project.stage === 'Formal Approval') {
         return {
           ok: false,
-          reason: 'Use Configure — CFO & GC must approve, then lock to Calendar.',
+          reason:
+            'Open Configure on Formal Approval, then Lock to Calendar.',
         }
       }
 
@@ -200,38 +200,41 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     [selectedId, closeModal],
   )
 
-  const addProject = useCallback((input?: {
-    title?: string
-    startDate?: string
-    targetCompletion?: string
-    formalReviewBy?: string
-  }) => {
-    const id = String(Date.now())
-    const today = new Date().toISOString().slice(0, 10)
-    const startDate = input?.startDate ?? today
-    const project: Project = {
-      id,
-      title: input?.title?.trim() || 'New Project',
-      stage: 'Informal Vetting',
-      startDate,
-      targetCompletion: input?.targetCompletion ?? today,
-      formalReviewBy: input?.formalReviewBy ?? today,
-      projectStatus: 'Building plan',
-      locked: false,
-      approvals: {
-        tax: 'Pending',
-        legal: 'Pending',
-        accounting: 'Pending',
-        finance: 'Pending',
-        cfo: 'Pending',
-        gc: 'Pending',
-        window30: 'OK',
-      },
-      steps: [],
-      stageDates: { new: startDate, informal: startDate },
-    }
-    setProjects((prev) => [project, ...prev])
-  }, [])
+  const addProject = useCallback(
+    (input?: {
+      title?: string
+      startDate?: string
+      targetCompletion?: string
+      formalReviewBy?: string
+    }) => {
+      const id = String(Date.now())
+      const today = new Date().toISOString().slice(0, 10)
+      const startDate = input?.startDate ?? today
+      const project: Project = {
+        id,
+        title: input?.title?.trim() || 'New Project',
+        stage: 'Informal Vetting',
+        startDate,
+        targetCompletion: input?.targetCompletion ?? today,
+        formalReviewBy: input?.formalReviewBy ?? today,
+        projectStatus: 'Building plan',
+        locked: false,
+        approvals: {
+          tax: 'Pending',
+          legal: 'Pending',
+          accounting: 'Pending',
+          finance: 'Pending',
+          cfo: 'Pending',
+          gc: 'Pending',
+          window30: 'OK',
+        },
+        steps: [],
+        stageDates: { new: startDate, informal: startDate },
+      }
+      setProjects((prev) => [project, ...prev])
+    },
+    [],
+  )
 
   const upsertStep = useCallback((projectId: string, step: ExecutionStep) => {
     setProjects((prev) =>
@@ -280,13 +283,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             )
           }
           return {
-            ...stampStageDate(p, 'Execution'),
+            ...stampStageDate(p, 'Formal Approval'),
             locked: false,
             projectStatus: 'Unlocked — re-approve',
             approvals: {
               ...p.approvals,
-              cfo: 'Pending',
-              gc: 'Pending',
+              tax: 'Pending',
+              legal: 'Pending',
+              accounting: 'Pending',
+              finance: 'Pending',
             },
           }
         }),
@@ -302,13 +307,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const pipelineProjects = useMemo(
     () =>
       projects.filter((p) =>
-        ['New', 'Informal Vetting', 'Formal Vetting'].includes(p.stage),
+        ['New', 'Informal Vetting', 'Formal Review'].includes(p.stage),
       ),
     [projects],
   )
 
   const executionProjects = useMemo(
-    () => projects.filter((p) => p.stage === 'Execution'),
+    () => projects.filter((p) => p.stage === 'Formal Approval'),
     [projects],
   )
 

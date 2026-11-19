@@ -5,37 +5,42 @@ import { formatMonthDay } from '../lib/dates'
 import type { ApprovalKey, ApprovalState } from '../types'
 import { StatusBadge } from './StatusBadge'
 
-const DEPT_READONLY: { key: ApprovalKey; label: string }[] = [
+const DEPT: { key: ApprovalKey; label: string }[] = [
   { key: 'tax', label: 'Tax' },
   { key: 'legal', label: 'Legal' },
   { key: 'accounting', label: 'Accounting' },
   { key: 'finance', label: 'Finance' },
 ]
 
-const FINAL: { key: ApprovalKey; label: string }[] = [
-  { key: 'cfo', label: 'CFO' },
-  { key: 'gc', label: 'GC' },
-]
+function chipClass(state: ApprovalState) {
+  if (state === 'Approved' || state === 'OK') {
+    return 'bg-[#dff6dd] text-[#0b6a0b] border-[#107c10]'
+  }
+  return 'bg-[#fde7e9] text-[#a4262c] border-[#d13438]'
+}
 
-export function ExecutionModal() {
+/** Formal Approval configure — dept tags, then Lock to Calendar. */
+export function FormalApprovalModal() {
   const navigate = useNavigate()
   const { selected, closeModal, setApproval, setLocked, canLock, updateProject } = useProjects()
 
   if (!selected) return null
 
   const ready = canLock(selected)
+  const pendingDepts = DEPT.filter(({ key }) => selected.approvals[key] !== 'Approved')
 
-  function toggleFinal(key: ApprovalKey) {
+  function toggle(key: ApprovalKey) {
     if (!selected || selected.locked) return
     const cur = selected.approvals[key]
-    setApproval(selected.id, key, cur === 'Approved' ? 'Pending' : 'Approved')
-  }
-
-  function chipClass(state: ApprovalState, interactive = false) {
-    if (state === 'Approved' || state === 'OK') {
-      return `bg-[#dff6dd] text-[#0b6a0b] border-[#107c10] ${interactive ? '' : 'opacity-90'}`
-    }
-    return `bg-[#fff4ce] text-[#6c5700] border-[#ffb900] ${interactive ? '' : 'opacity-90'}`
+    const next: ApprovalState =
+      key === 'window30'
+        ? cur === 'OK'
+          ? 'Pending'
+          : 'OK'
+        : cur === 'Approved'
+          ? 'Pending'
+          : 'Approved'
+    setApproval(selected.id, key, next)
   }
 
   function lockToCalendar() {
@@ -53,13 +58,12 @@ export function ExecutionModal() {
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-noble-text">{selected.title}</h2>
               <StatusBadge status={selected.projectStatus} />
-              <span className="rounded bg-[#fff4ce] px-2 py-0.5 text-xs font-semibold text-[#6c5700]">
-                Execution
+              <span className="rounded bg-[#deecf9] px-2 py-0.5 text-xs font-semibold text-[#004578]">
+                Formal Approval
               </span>
             </div>
             <p className="mt-1 text-sm text-noble-muted">
-              Department approvals are done. CFO &amp; GC must approve, then load the project to
-              Calendar.
+              Approve Tax, Legal, Accounting &amp; Finance. Then Lock to Calendar.
             </p>
           </div>
           <div className="flex items-center gap-1">
@@ -90,18 +94,57 @@ export function ExecutionModal() {
             <div className="font-medium">{selected.targetCompletion}</div>
           </div>
           <div>
-            <span className="text-xs font-semibold text-noble-muted">Formal review</span>
+            <span className="text-xs font-semibold text-noble-muted">Formal Review By</span>
             <div className="font-medium">{selected.formalReviewBy}</div>
           </div>
         </div>
 
-        <div className="max-h-[38vh] overflow-auto px-5 py-4">
-          <h3 className="mb-2 text-sm font-bold text-noble-text">Execution plan</h3>
+        <div className="border-b border-noble-border bg-[#faf9f8] px-5 py-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-bold text-noble-text">Formal Approval</h3>
+            <span
+              className={`text-xs font-semibold ${
+                pendingDepts.length === 0 ? 'text-[#0b6a0b]' : 'text-[#a4262c]'
+              }`}
+            >
+              {pendingDepts.length === 0
+                ? 'All departments approved'
+                : `${pendingDepts.length} pending in review: ${pendingDepts.map((d) => d.label).join(', ')}`}
+            </span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {DEPT.map(({ key, label }) => {
+              const state = selected.approvals[key]
+              const isPending = state !== 'Approved'
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={selected.locked}
+                  onClick={() => toggle(key)}
+                  className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left disabled:cursor-not-allowed ${chipClass(state)}`}
+                >
+                  <span className="text-sm font-semibold">{label}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                      isPending ? 'bg-[#a4262c]/15' : 'bg-[#107c10]/15'
+                    }`}
+                  >
+                    {state}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="max-h-[32vh] overflow-auto px-5 py-4">
+          <h3 className="mb-2 text-sm font-bold text-noble-text">Milestone plan</h3>
           <div className="overflow-x-auto rounded border border-noble-border">
             <table className="min-w-full text-left text-sm">
               <thead className="bg-[#f3f2f1] text-xs font-semibold uppercase tracking-wide text-noble-muted">
                 <tr>
-                  <th className="px-3 py-2">Execution Step</th>
+                  <th className="px-3 py-2">Milestone</th>
                   <th className="px-3 py-2">Responsible</th>
                   <th className="px-3 py-2">Start</th>
                   <th className="px-3 py-2">Due</th>
@@ -130,54 +173,22 @@ export function ExecutionModal() {
         </div>
 
         <div className="space-y-3 border-t border-noble-border px-5 py-4">
-          <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-noble-muted">
-              Formal department status (read-only)
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {DEPT_READONLY.map(({ key, label }) => {
-                const state = selected.approvals[key]
-                return (
-                  <span
-                    key={key}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${chipClass(state)}`}
-                  >
-                    {label} {state}
-                  </span>
-                )
-              })}
-              <span
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${chipClass(selected.approvals.window30)}`}
-              >
-                30-day window: {selected.approvals.window30 === 'OK' ? 'OK' : 'Pending'}
-              </span>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-noble-muted">
+              30-day window
+            </span>
+            <button
+              type="button"
+              disabled={selected.locked}
+              onClick={() => toggle('window30')}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed ${chipClass(selected.approvals.window30)}`}
+            >
+              {selected.approvals.window30 === 'OK' ? 'OK' : 'Pending'}
+            </button>
           </div>
 
-          <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-noble-muted">
-              Final approvals — click to toggle Pending / Approved
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {FINAL.map(({ key, label }) => {
-                const state = selected.approvals[key]
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    disabled={selected.locked}
-                    onClick={() => toggleFinal(key)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed ${chipClass(state, true)}`}
-                  >
-                    {label} {state}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2 text-sm text-noble-text">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
               <span className={selected.locked ? 'text-noble-muted' : 'font-semibold'}>
                 Unlocked
               </span>
@@ -199,7 +210,9 @@ export function ExecutionModal() {
                   }`}
                 />
               </button>
-              <span className={selected.locked ? 'font-semibold' : 'text-noble-muted'}>Locked</span>
+              <span className={selected.locked ? 'font-semibold' : 'text-noble-muted'}>
+                Lock to Calendar
+              </span>
             </div>
 
             <button
@@ -208,13 +221,15 @@ export function ExecutionModal() {
               onClick={lockToCalendar}
               className="rounded bg-noble-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[#a19f9d]"
             >
-              Proceed to Project Calendar
+              Lock to Calendar →
             </button>
           </div>
 
           {!ready && (
             <p className="text-xs text-[#a4262c]">
-              Approve both CFO and GC to load this project onto the Calendar.
+              {pendingDepts.length > 0
+                ? `Still pending: ${pendingDepts.map((d) => d.label).join(', ')}.`
+                : 'Clear the 30-day window before Lock to Calendar.'}
             </p>
           )}
         </div>

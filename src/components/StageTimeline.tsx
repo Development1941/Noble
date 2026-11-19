@@ -4,16 +4,16 @@ import { STAGE_LABELS, type Project, type Stage } from '../types'
 const DATE_KEYS: Record<Stage, keyof Project['stageDates']> = {
   New: 'new',
   'Informal Vetting': 'informal',
-  'Formal Vetting': 'formal',
-  Execution: 'execution',
+  'Formal Review': 'formal',
+  'Formal Approval': 'approval',
   'Locked in': 'lockedIn',
 }
 
 const FLOW_STAGES: Stage[] = [
   'New',
   'Informal Vetting',
-  'Formal Vetting',
-  'Execution',
+  'Formal Review',
+  'Formal Approval',
   'Locked in',
 ]
 
@@ -62,8 +62,7 @@ export function StageTimeline({ project }: { project: Project }) {
         })}
       </div>
       <p className="mt-3 text-xs text-noble-muted">
-        Flow: Informal builds plan → Formal (Tax/Legal/Accounting/Finance) → Execution (CFO/GC) →
-        Calendar.
+        1 New → 2 Informal → 3 Formal Review → 4 Formal Approval → 5 Lock to Calendar
       </p>
     </div>
   )

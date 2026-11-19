@@ -1,8 +1,8 @@
 export type Stage =
   | 'New'
   | 'Informal Vetting'
-  | 'Formal Vetting'
-  | 'Execution'
+  | 'Formal Review'
+  | 'Formal Approval'
   | 'Locked in'
 
 export type StepStatus = 'Completed' | 'On Track' | 'At Risk' | 'Blocked' | 'Pending'
@@ -32,7 +32,7 @@ export interface StageDates {
   new?: string
   informal?: string
   formal?: string
-  execution?: string
+  approval?: string
   lockedIn?: string
 }
 
@@ -61,17 +61,17 @@ export interface NewProjectInput {
 export const STAGES: Stage[] = [
   'New',
   'Informal Vetting',
-  'Formal Vetting',
-  'Execution',
+  'Formal Review',
+  'Formal Approval',
   'Locked in',
 ]
 
 export const STAGE_LABELS: Record<Stage, string> = {
   New: 'New',
   'Informal Vetting': 'Informal Vetting',
-  'Formal Vetting': 'Formal Vetting',
-  Execution: 'Execution',
-  'Locked in': 'Locked In',
+  'Formal Review': 'Formal Review',
+  'Formal Approval': 'Formal Approval',
+  'Locked in': 'Lock to Calendar',
 }
 
 export function stageIndex(stage: Stage): number {
@@ -94,11 +94,11 @@ export function shortStageLabel(stage: Stage): string {
       return 'New'
     case 'Informal Vetting':
       return 'Informal'
-    case 'Formal Vetting':
-      return 'Formal'
-    case 'Execution':
-      return 'Execution'
+    case 'Formal Review':
+      return 'Formal Review'
+    case 'Formal Approval':
+      return 'Formal Approval'
     case 'Locked in':
-      return 'Locked In'
+      return 'Calendar'
   }
 }

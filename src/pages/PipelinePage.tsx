@@ -4,7 +4,7 @@ import { AddProjectModal } from '../components/AddProjectModal'
 import { StageTimeline } from '../components/StageTimeline'
 import { useProjects } from '../context/ProjectContext'
 import { formatInputDate } from '../lib/dates'
-import { prevStage, shortStageLabel, type Project, type Stage } from '../types'
+import { prevStage, shortStageLabel, type Project } from '../types'
 
 const COLS =
   'grid grid-cols-[minmax(180px,1.4fr)_140px_140px_minmax(150px,1fr)_minmax(160px,1.1fr)_40px_36px] items-center gap-x-3'
@@ -18,7 +18,6 @@ export function PipelinePage() {
     openPlan,
     openReview,
     canAdvanceToFormal,
-    canAdvanceToExecution,
   } = useProjects()
   const [expanded, setExpanded] = useState<string | null>(pipelineProjects[0]?.id ?? null)
   const [toast, setToast] = useState<string | null>(null)
@@ -35,16 +34,19 @@ export function PipelinePage() {
   }
 
   function onNext(project: Project) {
-    if (project.stage === 'Formal Vetting') {
+    if (project.stage === 'Formal Review') {
       openReview(project.id)
       return
     }
-    if (project.stage === 'Informal Vetting') {
-      openPlan(project.id)
+    const fromStage = project.stage
+    const result = moveStage(project.id, 'next')
+    if (!result.ok) {
+      if (result.reason) showToast(result.reason)
       return
     }
-    const result = moveStage(project.id, 'next')
-    if (!result.ok && result.reason) showToast(result.reason)
+    if (fromStage === 'Informal Vetting') {
+      openReview(project.id)
+    }
   }
 
   return (
@@ -53,7 +55,7 @@ export function PipelinePage() {
         <div>
           <h1 className="text-2xl font-bold text-noble-text">Pipeline</h1>
           <p className="mt-1 text-sm text-noble-muted">
-            Tax creates → Informal builds plan → Formal department approvals → Execution
+            Informal → Formal Review → Formal Approval → Lock to Calendar
           </p>
         </div>
         <button
@@ -94,14 +96,17 @@ export function PipelinePage() {
 
         {pipelineProjects.map((project) => {
           const isOpen = expanded === project.id
-          const datesLocked = project.stage === 'Formal Vetting'
+          const datesLocked = project.stage === 'Formal Review'
           return (
             <div key={project.id} className="border-b border-noble-border last:border-b-0">
               <div className={`${COLS} px-4 py-3`}>
                 <button
                   type="button"
                   className="truncate text-left text-sm font-semibold text-noble-text hover:text-noble-blue"
-                  onClick={() => setExpanded(isOpen ? null : project.id)}
+                  onClick={() => {
+                    setExpanded(project.id)
+                    openPlan(project.id)
+                  }}
                   title={project.title}
                 >
                   {project.title}
@@ -128,9 +133,7 @@ export function PipelinePage() {
                     canAdvance={
                       project.stage === 'Informal Vetting'
                         ? canAdvanceToFormal(project)
-                        : project.stage === 'Formal Vetting'
-                          ? canAdvanceToExecution(project)
-                          : true
+                        : true
                     }
                     onNext={() => onNext(project)}
                     onPlan={() => openPlan(project.id)}
@@ -195,7 +198,7 @@ function DateCell({
 
 function BackButton({ project, onBack }: { project: Project; onBack: () => void }) {
   const back = prevStage(project.stage)
-  if (!back || back === 'Execution') {
+  if (!back || back === 'Formal Approval') {
     return <span className="text-xs text-noble-muted">—</span>
   }
   return (
@@ -250,36 +253,23 @@ function NextButton({
           disabled={!canAdvance}
           className="w-full truncate rounded border border-noble-blue px-2.5 py-1.5 text-xs font-semibold text-noble-blue hover:bg-[#deecf9] disabled:cursor-not-allowed disabled:opacity-45"
         >
-          Next → Formal
+          Next → Formal Review
         </button>
       </div>
     )
   }
 
-  if (project.stage === 'Formal Vetting') {
+  if (project.stage === 'Formal Review') {
     return (
       <button
         type="button"
         onClick={onReview}
         className="w-full truncate rounded bg-noble-navy px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-90"
       >
-        Open review → Execution
+        Open Formal Review →
       </button>
     )
   }
 
   return <span className="text-xs text-noble-muted">—</span>
-}
-
-export function nextButtonLabel(stage: Stage): string | null {
-  switch (stage) {
-    case 'New':
-      return 'Next → Informal'
-    case 'Informal Vetting':
-      return 'Next → Formal'
-    case 'Formal Vetting':
-      return 'Next → Execution'
-    default:
-      return null
-  }
 }

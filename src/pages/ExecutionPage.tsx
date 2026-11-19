@@ -4,7 +4,7 @@ import { useProjects } from '../context/ProjectContext'
 import { formatShortDate } from '../lib/dates'
 
 const COLS =
-  'grid grid-cols-[minmax(220px,2fr)_140px_80px_minmax(120px,1fr)_minmax(120px,1fr)] items-center gap-x-4'
+  'grid grid-cols-[minmax(220px,2fr)_140px_80px_minmax(140px,1fr)_minmax(120px,1fr)] items-center gap-x-4'
 
 export function ExecutionPage() {
   const { executionProjects, deleteProject, openExecution, updateProject } = useProjects()
@@ -12,9 +12,9 @@ export function ExecutionPage() {
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-noble-text">Execution Plan</h1>
+        <h1 className="text-2xl font-bold text-noble-text">Formal Approval</h1>
         <p className="mt-1 text-sm text-noble-muted">
-          After Formal department approvals. Configure milestones, then CFO &amp; GC lock to Calendar.
+          After Formal Review. Approve Tax, Legal, Accounting &amp; Finance, then Lock to Calendar.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export function ExecutionPage() {
 
         {executionProjects.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-noble-muted">
-            No projects in Execution. Complete Formal department approvals from Pipeline.
+            No projects in Formal Approval. Complete Formal Review from Pipeline first.
           </div>
         )}
 
@@ -43,7 +43,7 @@ export function ExecutionPage() {
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-noble-text">{project.title}</div>
               <div className="mt-0.5 text-xs text-noble-muted">
-                Formal review {formatShortDate(project.formalReviewBy)}
+                Formal Review By {formatShortDate(project.formalReviewBy)}
               </div>
             </div>
 

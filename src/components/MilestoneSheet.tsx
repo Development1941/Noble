@@ -117,14 +117,14 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
 
         <div className="px-5 py-4">
           <h3 className="mb-2 text-sm font-bold text-noble-text">
-            {readOnly ? 'Milestone plan (read-only)' : 'Execution Plan (Define the milestones)'}
+            {readOnly ? 'Milestone plan (read-only)' : 'Milestone plan (define the steps)'}
           </h3>
 
           <div className="overflow-x-auto rounded border border-noble-border">
             <table className="min-w-full text-left text-sm">
               <thead className="bg-[#f3f2f1] text-xs font-semibold uppercase tracking-wide text-noble-muted">
                 <tr>
-                  <th className="px-3 py-2">Execution Step</th>
+                  <th className="px-3 py-2">Milestone</th>
                   <th className="px-3 py-2">Responsible</th>
                   <th className="px-3 py-2">Start</th>
                   <th className="px-3 py-2">Due</th>
