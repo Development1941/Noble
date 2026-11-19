@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+  --color-noble-navy: #00205b;
+  --color-noble-blue: #0078d4;
+  --color-noble-blue-dark: #106ebe;
+  --color-noble-yellow: #ffd100;
+  --color-noble-sidebar: #f3f2f1;
+  --color-noble-border: #edebe9;
+  --color-noble-muted: #605e5c;
+  --color-noble-text: #323130;
+  --color-stage-done: #107c10;
+  --color-stage-current: #0078d4;
+  --color-status-completed: #107c10;
+  --color-status-ontrack: #0078d4;
+  --color-status-atrisk: #ffb900;
+  --color-status-blocked: #d13438;
+  --color-status-blackout: #69797e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-noble-text);
+  background: #faf9f8;
+  -webkit-font-smoothing: antialiased;
+}
