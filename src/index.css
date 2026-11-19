@@ -36,4 +36,11 @@ body {
   color: var(--color-noble-text);
   background: #faf9f8;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1023px) {
+  body.nav-lock {
+    overflow: hidden;
+  }
 }

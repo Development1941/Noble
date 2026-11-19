@@ -63,12 +63,12 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/40 p-4 sm:p-8">
-      <div className="my-4 w-full max-w-5xl rounded-lg bg-white shadow-xl">
-        <div className="flex items-start justify-between gap-3 border-b border-noble-border px-5 py-4">
-          <div>
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center overflow-auto bg-black/40 p-0 sm:items-start sm:p-4 md:p-8">
+      <div className="flex max-h-[100dvh] w-full max-w-5xl flex-col overflow-auto rounded-none bg-white shadow-xl sm:my-4 sm:max-h-none sm:rounded-lg">
+        <div className="flex items-start justify-between gap-3 border-b border-noble-border px-3 py-3 sm:px-5 sm:py-4">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-bold text-noble-text">{selected.title}</h2>
+              <h2 className="text-lg font-bold text-noble-text sm:text-xl">{selected.title}</h2>
               <StatusBadge status={selected.projectStatus} />
             </div>
             <p className="mt-1 text-sm text-noble-muted">
@@ -88,7 +88,7 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-4 border-b border-noble-border px-5 py-3">
+        <div className="flex flex-wrap gap-3 border-b border-noble-border px-3 py-3 sm:gap-4 sm:px-5">
           <label className="text-xs font-semibold text-noble-muted">
             Target
             <input
@@ -115,13 +115,13 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
           </label>
         </div>
 
-        <div className="px-5 py-4">
+        <div className="px-3 py-4 sm:px-5">
           <h3 className="mb-2 text-sm font-bold text-noble-text">
             {readOnly ? 'Milestone plan (read-only)' : 'Milestone plan (define the steps)'}
           </h3>
 
           <div className="overflow-x-auto rounded border border-noble-border">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-[640px] text-left text-sm sm:min-w-full">
               <thead className="bg-[#f3f2f1] text-xs font-semibold uppercase tracking-wide text-noble-muted">
                 <tr>
                   <th className="px-3 py-2">Milestone</th>
@@ -180,7 +180,7 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
           </div>
 
           {!readOnly && (
-            <div className="mt-3 grid gap-2 rounded border border-dashed border-noble-border bg-[#faf9f8] p-3 md:grid-cols-6">
+            <div className="mt-3 grid grid-cols-1 gap-2 rounded border border-dashed border-noble-border bg-[#faf9f8] p-3 sm:grid-cols-2 md:grid-cols-6">
               <input
                 placeholder="Step name"
                 value={draft.name}

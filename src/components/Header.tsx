@@ -1,16 +1,31 @@
-import { Bell, CircleHelp, Settings } from 'lucide-react'
+import { Bell, CircleHelp, Menu, Settings, X } from 'lucide-react'
 import { NobleLogo } from './NobleLogo'
 
-export function Header() {
+interface Props {
+  menuOpen: boolean
+  onMenuToggle: () => void
+}
+
+export function Header({ menuOpen, onMenuToggle }: Props) {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 bg-noble-navy px-3 text-white">
+    <header className="flex h-12 shrink-0 items-center gap-2 bg-noble-navy px-2 text-white sm:gap-3 sm:px-3">
+      <button
+        type="button"
+        aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={menuOpen}
+        onClick={onMenuToggle}
+        className="rounded p-1.5 text-white/90 hover:bg-white/10 lg:hidden"
+      >
+        {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
       <NobleLogo size="sm" />
       <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
         <span className="truncate opacity-95">Noble TLSP App</span>
         <span className="hidden text-white/50 sm:inline">|</span>
         <span className="hidden truncate text-white/80 sm:inline">Transaction Pipeline</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         <button
           type="button"
           className="hidden rounded px-2 py-1 text-xs text-white/90 hover:bg-white/10 md:inline"

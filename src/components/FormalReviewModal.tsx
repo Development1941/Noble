@@ -22,12 +22,12 @@ export function FormalReviewModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/40 p-4 sm:p-6">
-      <div className="my-2 flex w-full max-w-5xl flex-col rounded-lg bg-white shadow-xl">
-        <div className="flex items-start justify-between gap-3 border-b border-noble-border px-5 py-4">
-          <div>
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center overflow-auto bg-black/40 p-0 sm:items-start sm:p-4 md:p-6">
+      <div className="my-0 flex max-h-[100dvh] w-full max-w-5xl flex-col overflow-auto rounded-none bg-white shadow-xl sm:my-2 sm:max-h-none sm:rounded-lg">
+        <div className="flex items-start justify-between gap-3 border-b border-noble-border px-3 py-3 sm:px-5 sm:py-4">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-bold text-noble-text">{selected.title}</h2>
+              <h2 className="text-lg font-bold text-noble-text sm:text-xl">{selected.title}</h2>
               <span className="rounded bg-[#deecf9] px-2 py-0.5 text-xs font-semibold text-[#004578]">
                 Formal Review
               </span>
@@ -58,7 +58,7 @@ export function FormalReviewModal() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 border-b border-noble-border px-5 py-3 text-sm">
+        <div className="flex flex-wrap gap-3 border-b border-noble-border px-3 py-3 text-sm sm:gap-4 sm:px-5">
           <div>
             <span className="text-xs font-semibold text-noble-muted">Target</span>
             <div className="font-medium">{selected.targetCompletion}</div>
@@ -69,10 +69,10 @@ export function FormalReviewModal() {
           </div>
         </div>
 
-        <div className="max-h-[48vh] overflow-auto px-5 py-4">
+        <div className="max-h-[50vh] overflow-auto px-3 py-4 sm:px-5">
           <h3 className="mb-2 text-sm font-bold text-noble-text">Milestone plan (read-only)</h3>
           <div className="overflow-x-auto rounded border border-noble-border">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-[640px] text-left text-sm sm:min-w-full">
               <thead className="bg-[#f3f2f1] text-xs font-semibold uppercase tracking-wide text-noble-muted">
                 <tr>
                   <th className="px-3 py-2">Milestone</th>
@@ -110,7 +110,7 @@ export function FormalReviewModal() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-noble-border px-5 py-4">
+        <div className="flex flex-col gap-3 border-t border-noble-border px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <p className="text-xs text-noble-muted">
             Next: Formal Approval (Tax, Legal, Accounting, Finance) → Lock to Calendar.
           </p>
@@ -118,7 +118,7 @@ export function FormalReviewModal() {
             type="button"
             disabled={!ready}
             onClick={sendToExecution}
-            className="rounded bg-noble-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[#a19f9d]"
+            className="w-full rounded bg-noble-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[#a19f9d] sm:w-auto"
           >
             Send to Formal Approval →
           </button>

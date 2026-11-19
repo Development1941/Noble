@@ -6,17 +6,29 @@ import { NobleLogo } from './NobleLogo'
 const SHAREPOINT_URL =
   'https://noblecorp1-my.sharepoint.com/personal/msingal_noblecorp_com/Lists/Transaction%20Golden%20Record/AllItems.aspx?env=WebViewList'
 
-export function Sidebar() {
+interface Props {
+  open: boolean
+  onClose: () => void
+}
+
+export function Sidebar({ open, onClose }: Props) {
   const { counts } = useProjects()
 
   return (
-    <aside className="flex w-[200px] shrink-0 flex-col border-r border-noble-border bg-noble-sidebar">
+    <aside
+      className={[
+        'flex w-[min(280px,85vw)] shrink-0 flex-col border-r border-noble-border bg-noble-sidebar',
+        'fixed top-12 bottom-0 left-0 z-50 transition-transform duration-200 ease-out',
+        'lg:static lg:z-auto lg:w-[200px] lg:translate-x-0',
+        open ? 'translate-x-0 shadow-xl' : '-translate-x-full lg:translate-x-0',
+      ].join(' ')}
+    >
       <div className="flex items-center justify-center border-b border-noble-border px-3 py-4">
         <NobleLogo size="lg" />
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 p-2">
-        <NavLink to="/" end className={({ isActive }) => navClass(isActive)}>
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
+        <NavLink to="/" end className={({ isActive }) => navClass(isActive)} onClick={onClose}>
           <LayoutList className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Pipeline</span>
@@ -24,7 +36,11 @@ export function Sidebar() {
           </span>
         </NavLink>
 
-        <NavLink to="/approval" className={({ isActive }) => navClass(isActive)}>
+        <NavLink
+          to="/approval"
+          className={({ isActive }) => navClass(isActive)}
+          onClick={onClose}
+        >
           <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Formal Approval</span>
@@ -32,7 +48,11 @@ export function Sidebar() {
           </span>
         </NavLink>
 
-        <NavLink to="/calendar" className={({ isActive }) => navClass(isActive)}>
+        <NavLink
+          to="/calendar"
+          className={({ isActive }) => navClass(isActive)}
+          onClick={onClose}
+        >
           <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Calendar</span>
@@ -45,6 +65,7 @@ export function Sidebar() {
           target="_blank"
           rel="noreferrer"
           className={navClass(false)}
+          onClick={onClose}
         >
           <FolderKanban className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
@@ -55,7 +76,7 @@ export function Sidebar() {
           </span>
         </a>
 
-        <button type="button" className={`${navClass(false)} text-left`}>
+        <button type="button" className={`${navClass(false)} text-left`} onClick={onClose}>
           <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Teams</span>
@@ -63,7 +84,7 @@ export function Sidebar() {
           </span>
         </button>
 
-        <button type="button" className={`${navClass(false)} text-left`}>
+        <button type="button" className={`${navClass(false)} text-left`} onClick={onClose}>
           <Bot className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Chatbot</span>

@@ -12,6 +12,8 @@ const LEGEND: { label: string; status: StepStatus | 'Blackout' }[] = [
   { label: 'Blackout', status: 'Blackout' },
 ]
 
+const LABEL_W = 160
+
 export function CalendarPage() {
   const { calendarProjects, openExecution, setLocked } = useProjects()
 
@@ -41,59 +43,66 @@ export function CalendarPage() {
   )
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto w-full max-w-6xl">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-noble-text">Project Calendar</h1>
-        <p className="mt-1 text-sm text-noble-muted">
+        <h1 className="text-xl font-bold text-noble-text sm:text-2xl">Project Calendar</h1>
+        <p className="mt-1 text-xs text-noble-muted sm:text-sm">
           Locked projects after Formal Approval (Tax/Legal/Accounting/Finance).
         </p>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-noble-border bg-white shadow-sm">
-        <div className="relative border-b border-noble-border bg-[#faf9f8] px-4 py-2">
-          <div className="relative ml-[180px] h-8">
-            {range.ticks.map((t) => {
-              const left = (daysBetween(range.start, t) / range.totalDays) * 100
-              return (
-                <div
-                  key={t}
-                  className="absolute top-0 -translate-x-1/2 text-[10px] text-noble-muted"
-                  style={{ left: `${left}%` }}
-                >
-                  {new Date(t + 'T12:00:00').toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
         {calendarProjects.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-noble-muted">
             No locked projects yet. Complete Formal Approval, then Lock to Calendar.
           </div>
         )}
 
-        <div className="relative">
-          <div
-            className="pointer-events-none absolute top-0 bottom-0 z-10 w-px bg-noble-blue"
-            style={{ left: `calc(180px + (100% - 180px) * ${todayPct / 100})` }}
-          />
+        <div className="overflow-x-auto">
+          <div className="min-w-[640px]">
+            <div className="relative border-b border-noble-border bg-[#faf9f8] px-3 py-2 sm:px-4">
+              <div className="relative h-8" style={{ marginLeft: LABEL_W }}>
+                {range.ticks.map((t) => {
+                  const left = (daysBetween(range.start, t) / range.totalDays) * 100
+                  return (
+                    <div
+                      key={t}
+                      className="absolute top-0 -translate-x-1/2 text-[10px] text-noble-muted"
+                      style={{ left: `${left}%` }}
+                    >
+                      {new Date(t + 'T12:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
 
-          {calendarProjects.map((project) => (
-            <CalendarRow
-              key={project.id}
-              project={project}
-              range={range}
-              onOpen={() => openExecution(project.id)}
-              onUnlock={() => setLocked(project.id, false)}
-            />
-          ))}
+            <div className="relative">
+              <div
+                className="pointer-events-none absolute top-0 bottom-0 z-10 w-px bg-noble-blue"
+                style={{
+                  left: `calc(${LABEL_W}px + (100% - ${LABEL_W}px) * ${todayPct / 100})`,
+                }}
+              />
+
+              {calendarProjects.map((project) => (
+                <CalendarRow
+                  key={project.id}
+                  project={project}
+                  range={range}
+                  labelWidth={LABEL_W}
+                  onOpen={() => openExecution(project.id)}
+                  onUnlock={() => setLocked(project.id, false)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 border-t border-noble-border bg-[#faf9f8] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 border-t border-noble-border bg-[#faf9f8] px-3 py-3 sm:gap-3 sm:px-4">
           {LEGEND.map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <StatusBadge status={item.status} />
@@ -108,11 +117,13 @@ export function CalendarPage() {
 function CalendarRow({
   project,
   range,
+  labelWidth,
   onOpen,
   onUnlock,
 }: {
   project: Project
   range: { start: string; totalDays: number }
+  labelWidth: number
   onOpen: () => void
   onUnlock: () => void
 }) {
@@ -132,7 +143,10 @@ function CalendarRow({
 
   return (
     <div className="flex border-b border-noble-border last:border-b-0">
-      <div className="w-[180px] shrink-0 border-r border-noble-border px-3 py-3 text-left">
+      <div
+        className="shrink-0 border-r border-noble-border px-2 py-3 text-left sm:px-3"
+        style={{ width: labelWidth }}
+      >
         <button
           type="button"
           onClick={onOpen}
@@ -177,7 +191,7 @@ function CalendarRow({
                 <span className="truncate">{step.name}</span>
               </div>
               <div
-                className="absolute top-0"
+                className="absolute top-0 hidden sm:block"
                 style={{ left: `calc(${left}% + ${width}% + 4px)` }}
               >
                 <StatusBadge status={step.status} />

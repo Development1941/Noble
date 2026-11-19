@@ -7,7 +7,7 @@ import { formatInputDate } from '../lib/dates'
 import { prevStage, shortStageLabel, type Project } from '../types'
 
 const COLS =
-  'grid grid-cols-[minmax(180px,1.4fr)_140px_140px_minmax(150px,1fr)_minmax(160px,1.1fr)_40px_36px] items-center gap-x-3'
+  'hidden lg:grid grid-cols-[minmax(160px,1.4fr)_130px_130px_minmax(130px,1fr)_minmax(150px,1.1fr)_40px_36px] items-center gap-x-3'
 
 export function PipelinePage() {
   const {
@@ -49,19 +49,24 @@ export function PipelinePage() {
     }
   }
 
+  function selectProject(project: Project) {
+    setExpanded(project.id)
+    openPlan(project.id)
+  }
+
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-noble-text">Pipeline</h1>
-          <p className="mt-1 text-sm text-noble-muted">
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-noble-text sm:text-2xl">Pipeline</h1>
+          <p className="mt-1 text-xs text-noble-muted sm:text-sm">
             Informal → Formal Review → Formal Approval → Lock to Calendar
           </p>
         </div>
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded bg-noble-blue px-3 py-2 text-sm font-semibold text-white hover:bg-noble-blue-dark"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded bg-noble-blue px-3 py-2 text-sm font-semibold text-white hover:bg-noble-blue-dark"
         >
           <Plus className="h-4 w-4" /> New
         </button>
@@ -75,7 +80,7 @@ export function PipelinePage() {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-noble-border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-noble-border bg-white shadow-sm">
         <div
           className={`${COLS} border-b border-noble-border bg-[#f3f2f1] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-noble-muted`}
         >
@@ -97,16 +102,81 @@ export function PipelinePage() {
         {pipelineProjects.map((project) => {
           const isOpen = expanded === project.id
           const datesLocked = project.stage === 'Formal Review'
+          const canAdvance =
+            project.stage === 'Informal Vetting' ? canAdvanceToFormal(project) : true
+
           return (
             <div key={project.id} className="border-b border-noble-border last:border-b-0">
+              {/* Mobile / tablet card */}
+              <div className="space-y-3 p-3 sm:p-4 lg:hidden">
+                <div className="flex items-start gap-2">
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 text-left text-sm font-semibold text-noble-text hover:text-noble-blue"
+                    onClick={() => selectProject(project)}
+                    title={project.title}
+                  >
+                    {project.title}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Delete project"
+                    className="rounded p-1.5 text-[#a4262c] hover:bg-[#fde7e9]"
+                    onClick={() => {
+                      if (window.confirm(`Delete ${project.title}?`)) deleteProject(project.id)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={isOpen ? 'Collapse' : 'Expand'}
+                    className="rounded p-1.5 text-noble-muted hover:bg-black/5"
+                    onClick={() => setExpanded(isOpen ? null : project.id)}
+                  >
+                    {isOpen ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <Field label="Target Completion">
+                    <DateCell
+                      value={project.targetCompletion}
+                      onChange={(v) => updateProject(project.id, { targetCompletion: v })}
+                      disabled={datesLocked}
+                    />
+                  </Field>
+                  <Field label="Formal Review By">
+                    <DateCell
+                      value={project.formalReviewBy}
+                      onChange={(v) => updateProject(project.id, { formalReviewBy: v })}
+                      disabled={datesLocked}
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <BackButton project={project} onBack={() => onBack(project)} />
+                  <NextButton
+                    project={project}
+                    canAdvance={canAdvance}
+                    onNext={() => onNext(project)}
+                    onPlan={() => openPlan(project.id)}
+                    onReview={() => openReview(project.id)}
+                  />
+                </div>
+              </div>
+
+              {/* Desktop row */}
               <div className={`${COLS} px-4 py-3`}>
                 <button
                   type="button"
                   className="truncate text-left text-sm font-semibold text-noble-text hover:text-noble-blue"
-                  onClick={() => {
-                    setExpanded(project.id)
-                    openPlan(project.id)
-                  }}
+                  onClick={() => selectProject(project)}
                   title={project.title}
                 >
                   {project.title}
@@ -130,11 +200,7 @@ export function PipelinePage() {
                 <div className="min-w-0">
                   <NextButton
                     project={project}
-                    canAdvance={
-                      project.stage === 'Informal Vetting'
-                        ? canAdvanceToFormal(project)
-                        : true
-                    }
+                    canAdvance={canAdvance}
                     onNext={() => onNext(project)}
                     onPlan={() => openPlan(project.id)}
                     onReview={() => openReview(project.id)}
@@ -172,6 +238,15 @@ export function PipelinePage() {
         })}
       </div>
     </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-[11px] font-semibold uppercase tracking-wide text-noble-muted">
+      {label}
+      <div className="mt-1">{children}</div>
+    </label>
   )
 }
 
