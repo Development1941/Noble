@@ -9,14 +9,16 @@ const DATE_KEYS: Record<Stage, keyof Project['stageDates']> = {
   'Locked in': 'lockedIn',
 }
 
-/** Proposed flow timeline — Execution drafting removed from the happy path. */
-const FLOW_STAGES: Stage[] = ['New', 'Informal Vetting', 'Formal Vetting', 'Locked in']
+const FLOW_STAGES: Stage[] = [
+  'New',
+  'Informal Vetting',
+  'Formal Vetting',
+  'Execution',
+  'Locked in',
+]
 
 export function StageTimeline({ project }: { project: Project }) {
-  // Map Execution onto Locked path for display when someone is mid-migration
-  const displayStage: Stage =
-    project.stage === 'Execution' ? 'Locked in' : project.stage
-  const displayIndex = FLOW_STAGES.indexOf(displayStage)
+  const displayIndex = FLOW_STAGES.indexOf(project.stage)
 
   return (
     <div className="border-t border-noble-border bg-[#faf9f8] px-4 py-4">
@@ -60,7 +62,7 @@ export function StageTimeline({ project }: { project: Project }) {
         })}
       </div>
       <p className="mt-3 text-xs text-noble-muted">
-        Flow: Tax creates → Informal builds milestones → Formal reviews, approves &amp; locks →
+        Flow: Informal builds plan → Formal (Tax/Legal/Accounting/Finance) → Execution (CFO/GC) →
         Calendar.
       </p>
     </div>

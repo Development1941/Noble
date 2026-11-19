@@ -1,15 +1,18 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ExecutionModal } from './components/ExecutionModal'
 import { FormalReviewModal } from './components/FormalReviewModal'
 import { Layout } from './components/Layout'
 import { MilestoneSheet } from './components/MilestoneSheet'
 import { ProjectProvider, useProjects } from './context/ProjectContext'
 import { CalendarPage } from './pages/CalendarPage'
+import { ExecutionPage } from './pages/ExecutionPage'
 import { PipelinePage } from './pages/PipelinePage'
 
 function Modals() {
   const { modalMode } = useProjects()
   if (modalMode === 'plan') return <MilestoneSheet />
   if (modalMode === 'review') return <FormalReviewModal />
+  if (modalMode === 'execution') return <ExecutionModal />
   return null
 }
 
@@ -20,6 +23,7 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<PipelinePage />} />
+            <Route path="execution" element={<ExecutionPage />} />
             <Route path="calendar" element={<CalendarPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

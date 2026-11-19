@@ -1,22 +1,12 @@
-import { Lock, Plus, Trash2, X } from 'lucide-react'
+import { Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { useProjects } from '../context/ProjectContext'
 import { formatMonthDay } from '../lib/dates'
-import type { ApprovalKey, ApprovalState, ExecutionStep, StepStatus } from '../types'
+import type { ExecutionStep, StepStatus } from '../types'
 import { StatusBadge } from './StatusBadge'
 
 const OWNERS = ['Carey Fraser', 'David D.', 'Lisa', 'Tax', 'Legal', 'Accounting', 'Finance', 'MS']
 const STATUSES: StepStatus[] = ['Pending', 'On Track', 'At Risk', 'Blocked', 'Completed']
-
-const APPROVAL_ROWS: { key: ApprovalKey; label: string; options: ApprovalState[] }[] = [
-  { key: 'tax', label: 'Tax', options: ['Approved', 'Pending'] },
-  { key: 'legal', label: 'Legal', options: ['Approved', 'Pending'] },
-  { key: 'accounting', label: 'Accounting', options: ['Approved', 'Pending'] },
-  { key: 'finance', label: 'Finance', options: ['Approved', 'Pending'] },
-  { key: 'cfo', label: 'CFO', options: ['Approved', 'Pending'] },
-  { key: 'gc', label: 'GC', options: ['Approved', 'Pending'] },
-  { key: 'window30', label: '30-day window', options: ['OK', 'Pending', 'Approved'] },
-]
 
 interface Props {
   readOnly?: boolean
@@ -24,16 +14,7 @@ interface Props {
 }
 
 export function MilestoneSheet({ readOnly = false, title }: Props) {
-  const {
-    selected,
-    closeModal,
-    upsertStep,
-    deleteStep,
-    updateProject,
-    setApproval,
-    setLocked,
-    canLock,
-  } = useProjects()
+  const { selected, closeModal, upsertStep, deleteStep, updateProject } = useProjects()
   const [draft, setDraft] = useState({
     name: '',
     responsible: OWNERS[0],
@@ -93,8 +74,8 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
             <p className="mt-1 text-sm text-noble-muted">
               {title ??
                 (readOnly
-                  ? 'Formal review — plan is read-only. Approvals & lock below.'
-                  : 'Informal Vetting — build milestones. Save without locking; advance when ready.')}
+                  ? 'Plan preview (read-only).'
+                  : 'Informal Vetting — build milestones, then advance to Formal when ready.')}
             </p>
           </div>
           <button
@@ -279,59 +260,6 @@ export function MilestoneSheet({ readOnly = false, title }: Props) {
             </div>
           )}
         </div>
-
-        {readOnly && (
-          <div className="border-t border-noble-border px-5 py-4">
-            <h3 className="mb-2 text-sm font-bold text-noble-text">Approvals &amp; lock</h3>
-            <p className="mb-3 text-xs text-noble-muted">
-              All function approvals plus the 30-day window must be clear before locking to Calendar.
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {APPROVAL_ROWS.map((row) => (
-                <label
-                  key={row.key}
-                  className="flex items-center justify-between gap-2 rounded border border-noble-border bg-[#faf9f8] px-3 py-2 text-sm"
-                >
-                  <span className="font-semibold text-noble-text">{row.label}</span>
-                  <select
-                    value={selected.approvals[row.key]}
-                    disabled={selected.locked}
-                    onChange={(e) =>
-                      setApproval(selected.id, row.key, e.target.value as ApprovalState)
-                    }
-                    className="rounded border border-noble-border bg-white px-2 py-1 text-sm disabled:bg-[#f3f2f1]"
-                  >
-                    {row.options.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              {!selected.locked && (
-                <button
-                  type="button"
-                  disabled={!canLock(selected)}
-                  onClick={() => setLocked(selected.id, true)}
-                  className="inline-flex items-center gap-1.5 rounded bg-noble-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Lock className="h-4 w-4" /> Lock to Calendar
-                </button>
-              )}
-              {!canLock(selected) && !selected.locked && (
-                <span className="text-xs text-noble-muted">
-                  Approve Tax, Legal, Accounting, Finance, CFO, GC and clear the 30-day window.
-                </span>
-              )}
-              {selected.locked && (
-                <span className="text-sm font-semibold text-[#0b6a0b]">Locked — on Calendar</span>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

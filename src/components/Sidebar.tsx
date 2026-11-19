@@ -1,4 +1,4 @@
-import { Bot, CalendarDays, ExternalLink, FolderKanban, LayoutList } from 'lucide-react'
+import { Bot, CalendarDays, ClipboardList, ExternalLink, FolderKanban, LayoutList } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useProjects } from '../context/ProjectContext'
 import { NobleLogo } from './NobleLogo'
@@ -16,15 +16,19 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 p-2">
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) => navClass(isActive)}
-        >
+        <NavLink to="/" end className={({ isActive }) => navClass(isActive)}>
           <LayoutList className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-noble-text">Pipeline</span>
             <span className="block text-xs text-noble-muted">{counts.vetting} Vetting</span>
+          </span>
+        </NavLink>
+
+        <NavLink to="/execution" className={({ isActive }) => navClass(isActive)}>
+          <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-noble-muted" />
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-noble-text">Execution Plan</span>
+            <span className="block text-xs text-noble-muted">{counts.drafting} Drafting</span>
           </span>
         </NavLink>
 
@@ -69,8 +73,8 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-noble-border p-3 text-[10px] leading-snug text-noble-muted">
-        Proposed flow: Informal builds plan → Formal reviews &amp; locks → Calendar. Execution drafting
-        removed.
+        Informal builds plan → Formal (Tax/Legal/Accounting/Finance) → Execution (CFO/GC) →
+        Calendar.
       </div>
     </aside>
   )

@@ -36,7 +36,12 @@ interface ProjectContextValue {
   updateProject: (id: string, patch: Partial<Project>) => void
   moveStage: (id: string, direction: 'back' | 'next') => { ok: boolean; reason?: string }
   deleteProject: (id: string) => void
-  addProject: () => void
+  addProject: (input?: {
+    title?: string
+    startDate?: string
+    targetCompletion?: string
+    formalReviewBy?: string
+  }) => void
   upsertStep: (projectId: string, step: ExecutionStep) => void
   deleteStep: (projectId: string, stepId: string) => void
   setApproval: (projectId: string, key: ApprovalKey, state: ApprovalState) => void
@@ -195,16 +200,23 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     [selectedId, closeModal],
   )
 
-  const addProject = useCallback(() => {
+  const addProject = useCallback((input?: {
+    title?: string
+    startDate?: string
+    targetCompletion?: string
+    formalReviewBy?: string
+  }) => {
     const id = String(Date.now())
     const today = new Date().toISOString().slice(0, 10)
+    const startDate = input?.startDate ?? today
     const project: Project = {
       id,
-      title: 'New Project',
-      stage: 'New',
-      targetCompletion: today,
-      formalReviewBy: today,
-      projectStatus: 'Created by Tax',
+      title: input?.title?.trim() || 'New Project',
+      stage: 'Informal Vetting',
+      startDate,
+      targetCompletion: input?.targetCompletion ?? today,
+      formalReviewBy: input?.formalReviewBy ?? today,
+      projectStatus: 'Building plan',
       locked: false,
       approvals: {
         tax: 'Pending',
@@ -216,7 +228,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         window30: 'OK',
       },
       steps: [],
-      stageDates: { new: today },
+      stageDates: { new: startDate, informal: startDate },
     }
     setProjects((prev) => [project, ...prev])
   }, [])

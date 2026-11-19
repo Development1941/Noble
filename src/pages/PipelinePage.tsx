@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { AddProjectModal } from '../components/AddProjectModal'
 import { StageTimeline } from '../components/StageTimeline'
 import { useProjects } from '../context/ProjectContext'
 import { formatInputDate } from '../lib/dates'
@@ -11,7 +12,6 @@ const COLS =
 export function PipelinePage() {
   const {
     pipelineProjects,
-    addProject,
     deleteProject,
     updateProject,
     moveStage,
@@ -22,6 +22,7 @@ export function PipelinePage() {
   } = useProjects()
   const [expanded, setExpanded] = useState<string | null>(pipelineProjects[0]?.id ?? null)
   const [toast, setToast] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
 
   function showToast(msg: string) {
     setToast(msg)
@@ -57,12 +58,14 @@ export function PipelinePage() {
         </div>
         <button
           type="button"
-          onClick={addProject}
+          onClick={() => setAddOpen(true)}
           className="inline-flex items-center gap-1.5 rounded bg-noble-blue px-3 py-2 text-sm font-semibold text-white hover:bg-noble-blue-dark"
         >
           <Plus className="h-4 w-4" /> New
         </button>
       </div>
+
+      <AddProjectModal open={addOpen} onClose={() => setAddOpen(false)} />
 
       {toast && (
         <div className="mb-3 rounded border border-[#fde7e9] bg-[#fde7e9] px-3 py-2 text-sm text-[#a4262c]">

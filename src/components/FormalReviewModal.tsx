@@ -12,18 +12,20 @@ const DEPT: { key: ApprovalKey; label: string }[] = [
   { key: 'finance', label: 'Finance' },
 ]
 
-const FINAL: { key: ApprovalKey; label: string }[] = [
-  { key: 'cfo', label: 'CFO' },
-  { key: 'gc', label: 'GC' },
-]
-
 export function FormalReviewModal() {
   const navigate = useNavigate()
-  const { selected, closeModal, setApproval, setLocked, canLock, updateProject } = useProjects()
+  const {
+    selected,
+    closeModal,
+    setApproval,
+    canAdvanceToExecution,
+    moveStage,
+    updateProject,
+  } = useProjects()
 
   if (!selected) return null
 
-  const ready = canLock(selected)
+  const ready = canAdvanceToExecution(selected)
 
   function toggle(key: ApprovalKey) {
     if (!selected) return
@@ -46,10 +48,12 @@ export function FormalReviewModal() {
     return 'bg-[#fff4ce] text-[#6c5700] border-[#ffb900]'
   }
 
-  function lockToCalendar() {
+  function sendToExecution() {
     if (!selected || !ready) return
-    setLocked(selected.id, true)
-    navigate('/calendar')
+    const result = moveStage(selected.id, 'next')
+    if (!result.ok) return
+    closeModal()
+    navigate('/execution')
   }
 
   return (
@@ -64,14 +68,14 @@ export function FormalReviewModal() {
               </span>
             </div>
             <p className="mt-1 text-sm text-noble-muted">
-              Review the Informal plan (read-only). Department + CFO/GC approvals, then lock →
-              Calendar.
+              Department approvals only (Tax, Legal, Accounting, Finance). CFO &amp; GC approve on
+              Execution, then lock to Calendar.
             </p>
           </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title="Refresh approval status"
+              title="Refresh"
               className="rounded p-1.5 text-noble-blue hover:bg-[#deecf9]"
               onClick={() =>
                 updateProject(selected.id, { projectStatus: selected.projectStatus })
@@ -145,7 +149,7 @@ export function FormalReviewModal() {
         <div className="space-y-3 border-t border-noble-border px-5 py-4">
           <div>
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-noble-muted">
-              Department approvals
+              Department approvals — click to toggle Pending / Approved
             </div>
             <div className="flex flex-wrap gap-2">
               {DEPT.map(({ key, label }) => {
@@ -155,7 +159,7 @@ export function FormalReviewModal() {
                     key={key}
                     type="button"
                     onClick={() => toggle(key)}
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${chipClass(state)}`}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${chipClass(state)}`}
                   >
                     {label} {state}
                   </button>
@@ -164,74 +168,31 @@ export function FormalReviewModal() {
               <button
                 type="button"
                 onClick={() => toggle('window30')}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold ${chipClass(selected.approvals.window30)}`}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${chipClass(selected.approvals.window30)}`}
               >
                 30-day window: {selected.approvals.window30 === 'OK' ? 'OK' : 'Pending'}
               </button>
             </div>
           </div>
 
-          <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-noble-muted">
-              Final approvals (CFO / GC on Formal — option A)
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {FINAL.map(({ key, label }) => {
-                const state = selected.approvals[key]
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => toggle(key)}
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${chipClass(state)}`}
-                  >
-                    {label} {state}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2 text-sm text-noble-text">
-              <span className={selected.locked ? 'text-noble-muted' : 'font-semibold'}>
-                Unlocked
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={selected.locked}
-                onClick={() => {
-                  if (selected.locked) setLocked(selected.id, false)
-                  else if (ready) lockToCalendar()
-                }}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
-                  selected.locked ? 'bg-noble-blue' : 'bg-[#c8c6c4]'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                    selected.locked ? 'translate-x-5' : ''
-                  }`}
-                />
-              </button>
-              <span className={selected.locked ? 'font-semibold' : 'text-noble-muted'}>Locked</span>
-            </div>
-
+            <p className="text-xs text-noble-muted">
+              CFO &amp; GC approvals happen on the Execution screen after this step.
+            </p>
             <button
               type="button"
               disabled={!ready}
-              onClick={lockToCalendar}
+              onClick={sendToExecution}
               className="rounded bg-noble-navy px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:bg-[#a19f9d]"
             >
-              Lock plan → Project Calendar
+              Send to Execution →
             </button>
           </div>
 
           {!ready && (
             <p className="text-xs text-[#a4262c]">
-              Lock requires ≥1 milestone, Tax / Legal / Accounting / Finance / CFO / GC Approved, and
-              30-day window OK.
+              Approve Tax, Legal, Accounting, and Finance (and clear the 30-day window) before
+              sending to Execution.
             </p>
           )}
         </div>

@@ -45,8 +45,7 @@ export function CalendarPage() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-noble-text">Project Calendar</h1>
         <p className="mt-1 text-sm text-noble-muted">
-          Locked projects after Formal approve &amp; lock. Milestones were built in Informal and
-          approved in Formal.
+          Locked projects after CFO &amp; GC approve on Execution and load to Calendar.
         </p>
       </div>
 
@@ -73,7 +72,7 @@ export function CalendarPage() {
 
         {calendarProjects.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-noble-muted">
-            No locked projects yet. Complete Formal review &amp; lock from Pipeline.
+            No locked projects yet. Approve CFO &amp; GC on Execution, then Proceed to Calendar.
           </div>
         )}
 
